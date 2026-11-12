@@ -159,6 +159,54 @@ npm run lint
 
 ## Deployment
 
+### pgvector installation prerequisite
+
+`VECTOR_SEARCH_ENABLED=false` disables vector behavior at runtime, but the current Prisma schema still declares `Unsupported("vector(1024)")`. The PostgreSQL server must therefore have the pgvector extension files installed, and the extension must be enabled in `summer_checkin` before `prisma db push`.
+
+The recommended development setup uses the repository's PostgreSQL 16 image, which already contains the extension files:
+
+```bash
+# Ensure native PostgreSQL is not already occupying port 5432, then start the container
+docker compose up -d postgres
+
+# Enable pgvector once in the application database
+docker exec postgresServer \
+  psql -U postgres -d summer_checkin \
+  -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+
+# Verify installation
+docker exec postgresServer \
+  psql -U postgres -d summer_checkin \
+  -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';"
+
+# Create the Prisma-managed tables and seed data
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+```
+
+The current native local server is Homebrew PostgreSQL 14. The current Homebrew `pgvector` formula only installs into supported newer Homebrew PostgreSQL formulas, so `brew install pgvector` is not a reliable installation path for this PostgreSQL 14 instance. Prefer the Docker PostgreSQL 16 setup above.
+
+If PostgreSQL 14 must be retained, compile pgvector against that exact server's `pg_config`:
+
+```bash
+git clone --branch v0.8.7 https://github.com/pgvector/pgvector.git
+cd pgvector
+export PG_CONFIG="$(brew --prefix postgresql@14)/bin/pg_config"
+make clean
+make
+make install
+```
+
+Then create or select `summer_checkin` with an administrative role and enable the extension:
+
+```bash
+psql -U henryheng -d summer_checkin \
+  -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+```
+
+Installing files and enabling the extension are separate operations. `CREATE EXTENSION vector` must be executed once in every database that uses vector columns.
+
 Development with vector runtime behavior disabled:
 
 ```dotenv
