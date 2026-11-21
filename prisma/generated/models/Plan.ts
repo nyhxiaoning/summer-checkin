@@ -537,10 +537,6 @@ export type PlanUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.PlanScalarWhereInput | Prisma.PlanScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type PlanCreateNestedOneWithoutTasksInput = {
   create?: Prisma.XOR<Prisma.PlanCreateWithoutTasksInput, Prisma.PlanUncheckedCreateWithoutTasksInput>
   connectOrCreate?: Prisma.PlanCreateOrConnectWithoutTasksInput

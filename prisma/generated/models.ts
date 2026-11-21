@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/Session'
 export type * from './models/Account'
+export type * from './models/Verification'
 export type * from './models/Plan'
 export type * from './models/PlanTask'
 export type * from './models/Todo'
